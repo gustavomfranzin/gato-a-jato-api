@@ -3,10 +3,12 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import cors from 'cors';
 
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -14,6 +16,7 @@ app.get('/', (req, res) => {
 });
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 app.post('/new-entry', async (req, res) => {
     try {
         const entriesPath = path.join(__dirname, 'entries.json');
@@ -90,7 +93,7 @@ app.delete('/delete-entry/:id', async (req, res) => {
 
 
         if (entryIndex === -1) {
-            res.status(404).send('Objeto não encontrado');
+            res.status(404).send('Customer not found');
             return;
         }
 
