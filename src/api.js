@@ -1,10 +1,8 @@
 import { PORT } from './config.js';
 import express from 'express';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
-
+import { v4 as uuidv4 } from 'uuid';
+import { db } from './dbConnect.js'
 
 const app = express();
 
@@ -15,22 +13,37 @@ app.get('/', (req, res) => {
     res.send('API Available at ' + new Date());
 });
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
-
 app.post('/new-entry', async (req, res) => {
     try {
-        const entriesPath = path.join(__dirname, 'entries.json');
-        const entriesContent = await fs.readFile(entriesPath, 'utf-8');
+        const {
+            customer_name,
+            car_brand,
+            car_model,
+            car_year,
+            car_license_plate,
+            process_status,
+            cleaning_type,
+        } = req.body;
 
-        let entriesArray = JSON.parse(entriesContent);
+        const id = uuidv4();
+        const created_at = new Date().toISOString();
 
-        const now = new Date();
-        const newEntry = { id: uuidv4(), ...req.body, created_at: now.toISOString() };
-        entriesArray.push(newEntry);
 
-        await fs.writeFile(entriesPath, JSON.stringify(entriesArray));
+        const sql = `INSERT INTO car_registration (id, customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, created_at) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        res.status(200).send('Entry Saved!');
+        const values = [id, customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, created_at];
+
+        db.run(sql, values, (err) => {
+
+            if (err) {
+                console.error(err.message);
+                res.status(500).send('Error inserting data');
+                return
+            }
+            res.status(200).send('Entry Saved!');
+        })
+
     } catch (error) {
         console.error(error);
         res.status(500).send('Server Error')
@@ -39,11 +52,12 @@ app.post('/new-entry', async (req, res) => {
 
 app.get('/list-entries', async (req, res) => {
     try {
-        const entriesPath = path.join(__dirname, 'entries.json');
-        const entriesContent = await fs.readFile(entriesPath, 'utf-8');
-
-        const entriesArray = JSON.parse(entriesContent);
-        res.status(200).json(entriesArray);
+        db.all('SELECT * FROM car_registration', [], (err, rows) => {
+            if (err) {
+                throw err;
+            }
+            res.send(rows);
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server Error')
@@ -52,29 +66,18 @@ app.get('/list-entries', async (req, res) => {
 
 app.put('/update-entry/:id', async (req, res) => {
     try {
-        const id = req.params.id;
-        const updates = req.body;
+        const db = new sqlite3.Database('car_wash.db');
+        const { id } = req.params;
+        const { customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type } = req.body;
 
-        const entriesPath = path.join(__dirname, 'entries.json');
-
-        const entriesContent = await fs.readFile(entriesPath, 'utf8');
-        let entries = JSON.parse(entriesContent);
-
-        const entryToUpdateIndex = entries.findIndex(entry => entry.id === id);
-
-        if (entryToUpdateIndex === -1) {
-            res.status(404).send('Customer not found');
-            return;
-        }
-
-        entries[entryToUpdateIndex] = {
-            ...entries[entryToUpdateIndex],
-            ...updates,
-        };
-
-        await fs.writeFile(entriesPath, JSON.stringify(entries), 'utf8');
-
-        res.send('Customer updated');
+        db.run('UPDATE car_registration SET customer_name=?, car_brand=?, car_model=?, car_year=?, car_license_plate=?, process_status=?, cleaning_type=? WHERE id=?',
+            [customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, id], function (err) {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).send(err.message);
+                }
+                res.send(`Registro com id ${id} atualizado com sucesso!`);
+            });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error')
@@ -83,27 +86,14 @@ app.put('/update-entry/:id', async (req, res) => {
 
 app.delete('/delete-entry/:id', async (req, res) => {
     try {
-        const id = req.params.id;
-        const entriesPath = path.join(__dirname, 'entries.json');
-        const entriesContent = await fs.readFile(entriesPath, 'utf-8');
-        const entriesArray = JSON.parse(entriesContent);
-
-        const entryIndex = entriesArray.findIndex(entry => entry.id === id);
-
-
-
-        if (entryIndex === -1) {
-            res.status(404).send('Customer not found');
-            return;
-        }
-
-        entriesArray.splice(entryIndex, 1);
-
-        await fs.writeFile(entriesPath, JSON.stringify(entriesArray));
-
-        res.status(200).send('Entry removed');
-
-
+        const { id } = req.params;
+        db.run(`DELETE FROM car_registration WHERE id = ?`, id, (err) => {
+            if (err) {
+                console.log(err.message);
+                return res.status(500).send('Internal Server Error');
+            }
+            res.status(200).send(`Car with id ${id} deleted`);
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Erro interno do servidor');
@@ -111,5 +101,5 @@ app.delete('/delete-entry/:id', async (req, res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT} !`);
 });
