@@ -54,12 +54,12 @@ export const readCustomerCreated = async (req, res) => {
 
 export const updateCustomerCreated = async (req, res) => {
     try {
-        const db = new sqlite3.Database('car_wash.db');
         const { id } = req.params;
         const { customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type } = req.body;
+        const updated_at = new Date().toISOString();
 
-        db.run('UPDATE car_registration SET customer_name=?, car_brand=?, car_model=?, car_year=?, car_license_plate=?, process_status=?, cleaning_type=? WHERE id=?',
-            [customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, id], function (err) {
+        db.run('UPDATE car_registration SET customer_name=?, car_brand=?, car_model=?, car_year=?, car_license_plate=?, process_status=?, cleaning_type=?, updated_at=? WHERE id=?',
+            [customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, updated_at, id], function (err) {
                 if (err) {
                     console.log(err);
                     return res.status(500).send(err.message);
