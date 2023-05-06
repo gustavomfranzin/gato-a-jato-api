@@ -64,6 +64,11 @@ export const updateCustomerCreated = async (req, res) => {
                     console.log(err);
                     return res.status(500).send(err.message);
                 }
+
+                if (this.changes === 0) {
+                    return res.status(404).send(`Customer with id ${id} not found`);
+                }
+
                 res.send(`Registro com id ${id} atualizado com sucesso!`);
             });
     } catch (error) {
@@ -75,12 +80,17 @@ export const updateCustomerCreated = async (req, res) => {
 export const deleteCustomerCreated = async (req, res) => {
     try {
         const { id } = req.params;
-        db.run(`DELETE FROM car_registration WHERE id = ?`, id, (err) => {
+        db.run(`DELETE FROM car_registration WHERE id = ?`, id, function (err) {
             if (err) {
                 console.log(err.message);
                 return res.status(500).send('Internal Server Error');
             }
-            res.status(200).send(`Car with id ${id} deleted`);
+
+            if (this.changes === 0) {
+                return res.status(404).send(`Customer with id ${id} not found`);
+            }
+
+            res.status(200).send(`Customer with id ${id} deleted`);
         });
     } catch (error) {
         console.error(error);
