@@ -26,28 +26,61 @@ export const createEntryCustomer = async (req, res) => {
 
             if (err) {
                 console.error(err.message);
-                res.status(500).send('Error inserting data');
+                res.status(500).send({
+                    message: 'Erro ao inserir dados, formato inválido ou vazio',
+                    data: {
+                        id,
+                        customer_name,
+                        car_brand,
+                        car_model,
+                        car_year,
+                        car_license_plate,
+                        process_status,
+                        cleaning_type,
+                        created_at
+                    }
+                });
                 return
             }
-            res.status(200).send('Entry Saved!');
+
+            const response = {
+                message: 'Cliente criado com sucesso',
+                data: {
+                    id,
+                    customer_name,
+                    car_brand,
+                    car_model,
+                    car_year,
+                    car_license_plate,
+                    process_status,
+                    cleaning_type,
+                    created_at
+                }
+            };
+
+            res.status(201).send(response);
         })
 
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        console.error(err);
         res.status(500).send('Server Error')
     }
 }
 
 export const readCustomerCreated = async (req, res) => {
     try {
-        db.all('SELECT * FROM car_registration', [], (err, rows) => {
+        db.all('SELECT * FROM car_registration ORDER BY created_at desc', [], (err, rows) => {
             if (err) {
-                throw err;
+                console.error(err.message);
+                res.status(500).send('Não foi possível carregar os dados');
             }
-            res.send(rows);
+
+            res.status(200).send(rows);
+
+            return rows;
         });
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        console.error(err);
         res.status(500).send('Server Error')
     }
 }
@@ -61,19 +94,32 @@ export const updateCustomerCreated = async (req, res) => {
         db.run('UPDATE car_registration SET customer_name=?, car_brand=?, car_model=?, car_year=?, car_license_plate=?, process_status=?, cleaning_type=?, updated_at=? WHERE id=?',
             [customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, updated_at, id], function (err) {
                 if (err) {
-                    console.log(err);
-                    return res.status(500).send(err.message);
+                    console.error(err);
+                    return res.status(500).send({
+                        message: 'Erro ao atualizar os dados, formato inválido ou vazio',
+                        data: {
+                            id,
+                            customer_name,
+                            car_brand,
+                            car_model,
+                            car_year,
+                            car_license_plate,
+                            process_status,
+                            cleaning_type,
+                        }
+                    });
+                    return
                 }
 
                 if (this.changes === 0) {
-                    return res.status(404).send(`Customer with id ${id} not found`);
+                    return res.status(404).send(`ID:${id} inválido ou não encontrado`);
                 }
 
-                res.send(`Registro com id ${id} atualizado com sucesso!`);
+                res.status(200).send(`Cliente atualizado com sucesso`);
             });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error')
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error')
     }
 }
 
@@ -87,13 +133,13 @@ export const deleteCustomerCreated = async (req, res) => {
             }
 
             if (this.changes === 0) {
-                return res.status(404).send(`Customer with id ${id} not found`);
+                return res.status(404).send(`Ocorreu um erro, ID: ${id} não encontrado`);
             }
 
-            res.status(200).send(`Customer with id ${id} deleted`);
+            res.status(200).send(`Cliente com ID: ${id} deletado com sucesso`);
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Erro interno do servidor');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
     }
 }
