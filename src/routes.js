@@ -1,4 +1,5 @@
-import carRegistrationRoutes from './routes/carRegistrationRoutes.js'
+import carRegistrationRoutes from './routes/carRegistrationRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 export default (app) => {
 
@@ -7,4 +8,5 @@ export default (app) => {
     });
 
     app.use('/cars', carRegistrationRoutes);
+    app.use('/auth', userRoutes);
 };
