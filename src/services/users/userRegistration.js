@@ -54,24 +54,3 @@ export const createUserLogin = async (req, res) => {
         res.status(500).send('Server Error')
     }
 }
-
-export const getUsers = (req, res) => {
-
-    try {
-        db_accounts.all('SELECT * FROM users ORDER BY created_at desc', [], (err, rows) => {
-            if (err) {
-                console.error(err.message);
-                res.status(500).send('Não foi possível carregar os dados');
-            }
-
-            res.status(200).send(rows);
-
-            return rows;
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error')
-    }
-
-
-}
