@@ -9,9 +9,10 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(validateJsonSyntax)
 
 app.use('/api', createProxyMiddleware({ target: 'https://www.carqueryapi.com', changeOrigin: true }));
+
+app.use(validateJsonSyntax)
 
 routes(app);
 
