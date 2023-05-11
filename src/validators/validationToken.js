@@ -9,7 +9,7 @@ export const verifyToken = (req, res, next) => {
 
     jwt.verify(token, `${TOKEN_ACCOUNTS}`, (err, decoded) => {
         if (err) {
-            return res.status(403).json({ message: 'Token inválido' });
+            return res.status(403).json({ message: 'Token inválido ou expirado' });
         }
 
         req.userId = decoded.userId;
