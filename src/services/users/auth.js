@@ -73,10 +73,9 @@ export const refreshTokens = (req, res) => {
 
             const accessToken = row.access_token;
 
-            // Verifique se o token de acesso atual está expirado
             jwt.verify(accessToken, TOKEN_ACCOUNTS, (err) => {
                 if (err) {
-                    // O token de acesso está expirado, gere um novo token de acesso
+
                     const newAccessToken = jwt.sign({ userId: row.id }, TOKEN_ACCOUNTS, { expiresIn: `${EXPIRATION_TOKEN_ACCOUNTS}` });
 
                     db_accounts.run('UPDATE users SET access_token=? WHERE id=?', [newAccessToken, userId], (err) => {
@@ -91,7 +90,7 @@ export const refreshTokens = (req, res) => {
                         });
                     });
                 } else {
-                    // O token de acesso atual não está expirado, retorne o mesmo token
+
                     res.status(200).json({
                         message: 'Token dentro da validade',
                         access_token: accessToken
