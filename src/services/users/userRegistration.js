@@ -84,7 +84,6 @@ export const createUserLogin = async (req, res) => {
 
 export const loginUser = (req, res) => {
     const { username, password } = req.body;
-    console.log({ username, password });
 
     db_accounts.get('SELECT id, username, password FROM users WHERE username=?', [username], (err, row) => {
         if (err) {
