@@ -21,10 +21,10 @@ export const loginUser = (req, res) => {
             res.status(401).send('Usuário não encontrado');
         } else {
             const passwordMatch = bcrypt.compareSync(password, row.password);
-            console.log(passwordMatch);
+
             if (passwordMatch) {
-                const accessToken = jwt.sign({ userId: row.id }, `${TOKEN_ACCOUNTS}`, { expiresIn: '30m' });
-                const refreshToken = jwt.sign({ userId: row.id }, `${TOKEN_REFRESH_ACCOUNTS}`, { expiresIn: '7d' });
+                const accessToken = jwt.sign({ userId: row.id }, `${TOKEN_ACCOUNTS}`, { expiresIn: '50s' });
+                const refreshToken = jwt.sign({ userId: row.id }, `${TOKEN_REFRESH_ACCOUNTS}`, { expiresIn: '1d' });
 
                 db_accounts.run('UPDATE users SET access_token=?, refresh_token=? WHERE id=?', [accessToken, refreshToken, row.id], (err) => {
                     if (err) {
@@ -72,7 +72,7 @@ export const refreshTokens = (req, res) => {
             }
 
 
-            const accessToken = jwt.sign({ userId: row.id }, TOKEN_ACCOUNTS, { expiresIn: '30m' });
+            const accessToken = jwt.sign({ userId: row.id }, TOKEN_ACCOUNTS, { expiresIn: '1m' });
 
 
             db_accounts.run('UPDATE users SET access_token=? WHERE id=?', [accessToken, userId], (err) => {

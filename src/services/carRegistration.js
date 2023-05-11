@@ -128,7 +128,7 @@ export const deleteCustomerCreated = async (req, res) => {
         const { id } = req.params;
         db.run(`DELETE FROM car_registration WHERE id = ?`, id, function (err) {
             if (err) {
-                console.log(err.message);
+                console.error(err.message);
                 return res.status(500).send('Internal Server Error');
             }
 
