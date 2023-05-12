@@ -53,6 +53,10 @@ export const createUserLogin = async (req, res) => {
 
             const hashedPassword = bcrypt.hashSync(password, salt);
 
+            const permissions = 'root';
+
+            const role = 'owner';
+
             const sql = 'INSERT INTO users (cod_company, company, username, email, password, role, full_name, date_of_birth, phone_number, permissions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
             db_accounts.run(sql, [cod_company, company, username, email, hashedPassword, role, full_name, date_of_birth, phone_number, permissions], function (err) {
