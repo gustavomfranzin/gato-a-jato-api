@@ -26,11 +26,9 @@ const schemaUserCreate = Joi.object({
     username: Joi.string().required(),
     email: Joi.string().email().required(),
     password: Joi.string().required(),
-    role: Joi.string().required(),
     full_name: Joi.string().required(),
     date_of_birth: Joi.date().iso().required(),
     phone_number: Joi.string().required(),
-    permissions: Joi.string().required()
 });
 
 const validateUserCreateFields = (req, res, next) => {
