@@ -1,5 +1,6 @@
 import carRegistrationRoutes from './routes/carRegistrationRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import { verifyToken } from './validators/validationToken.js'
 
 export default (app) => {
 
@@ -7,6 +8,6 @@ export default (app) => {
         res.send('API Available at ' + new Date());
     });
 
-    app.use('/cars', carRegistrationRoutes);
+    app.use('/cars', verifyToken, carRegistrationRoutes);
     app.use('/auth', userRoutes);
 };

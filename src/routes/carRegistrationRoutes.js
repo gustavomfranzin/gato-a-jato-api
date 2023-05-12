@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { createEntryCustomer, readCustomerCreated, updateCustomerCreated, deleteCustomerCreated } from '../services/carRegistration.js';
 import { validateFields } from '../validators/validationSchema.js';
+
+
 const router = Router();
 
 router.post('/new-entry', validateFields, createEntryCustomer);
