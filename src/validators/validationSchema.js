@@ -1,33 +1,19 @@
 import Joi from 'joi';
 
 const schema = Joi.object({
-    customer_name: Joi.string().required().messages({
-        'any.required': `The field 'customer_name' is required`,
-    }),
-    car_brand: Joi.string().required().messages({
-        'any.required': `The field 'car_brand' is required`,
-    }),
-    car_model: Joi.string().required().messages({
-        'any.required': `The field 'car_model' is required`,
-    }),
-    car_year: Joi.number().required().messages({
-        'any.required': `The field 'car_year' is required`,
-    }),
-    car_license_plate: Joi.string().required().messages({
-        'any.required': `The field 'car_license_plate' is required`,
-    }),
-    process_status: Joi.string().required().messages({
-        'any.required': `The field 'process_status' is required`,
-    }),
-    cleaning_type: Joi.string().required().messages({
-        'any.required': `The field 'cleaning_type' is required`,
-    }),
+    customer_name: Joi.string().required(),
+    car_brand: Joi.string().required(),
+    car_model: Joi.string().required(),
+    car_year: Joi.number().integer().required(),
+    car_license_plate: Joi.string().required(),
+    process_status: Joi.string().required(),
+    cleaning_type: Joi.string().required()
 });
 
 const validateFields = (req, res, next) => {
     const { error } = schema.validate(req.body, { abortEarly: false });
     if (error) {
-        const errorMessage = `The following fields are required: ${error.details
+        const errorMessage = `The following fields are required or not valid: ${error.details
             .map((detail) => `'${detail.context.key}'`)
             .join(', ')}`;
         return res.status(400).json({ error: errorMessage });
@@ -36,18 +22,21 @@ const validateFields = (req, res, next) => {
 };
 
 const schemaUserCreate = Joi.object({
-    username: Joi.string().required().messages({ 'any.required': `The Field 'username' is required'` }),
-    email: Joi.string().required().messages({ 'any.required': `The Field 'email' is required'` }),
-    password: Joi.string().required().messages({ 'any.required': `The Field 'password' is required'` }),
-    full_name: Joi.string().required().messages({ 'any.required': `The Field 'full_name' is required'` }),
-    date_of_birth: Joi.string().required().messages({ 'any.required': `The Field 'date_of_birth' is required'` }),
-    phone_number: Joi.string().required().messages({ 'any.required': `The Field 'phone_number' is required'` })
+    company: Joi.string().required(),
+    username: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+    role: Joi.string().required(),
+    full_name: Joi.string().required(),
+    date_of_birth: Joi.date().iso().required(),
+    phone_number: Joi.string().required(),
+    permissions: Joi.string().required()
 });
 
 const validateUserCreateFields = (req, res, next) => {
     const { error } = schemaUserCreate.validate(req.body, { abortEarly: false });
     if (error) {
-        const errorMessage = `The following fields are required: ${error.details
+        const errorMessage = `The following fields are required or not valid: ${error.details
             .map((detail) => `'${detail.context.key}'`)
             .join(', ')}`;
         return res.status(400).json({ error: errorMessage });

@@ -3,12 +3,15 @@ import bcrypt from 'bcryptjs';
 
 export const createUserLogin = async (req, res) => {
     const {
+        company,
         username,
         email,
         password,
+        role,
         full_name,
         date_of_birth,
         phone_number,
+        permissions,
     } = req.body;
 
     try {
@@ -38,13 +41,21 @@ export const createUserLogin = async (req, res) => {
                 return;
             }
 
+            //autoincrement do cod_company, sqlite3 não permite autoincrement em dois campos
+
+            function generateRandomNumber() {
+                return Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
+            }
+
+            const cod_company = generateRandomNumber();
+
             const salt = bcrypt.genSaltSync(10);
 
             const hashedPassword = bcrypt.hashSync(password, salt);
 
-            const sql = 'INSERT INTO users (username, email, password, full_name, date_of_birth, phone_number) VALUES (?, ?, ?, ?, ?, ?)';
+            const sql = 'INSERT INTO users (cod_company, company, username, email, password, role, full_name, date_of_birth, phone_number, permissions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-            db_accounts.run(sql, [username, email, hashedPassword, full_name, date_of_birth, phone_number], function (err) {
+            db_accounts.run(sql, [cod_company, company, username, email, hashedPassword, role, full_name, date_of_birth, phone_number, permissions], function (err) {
                 if (err) {
                     console.error(err.message);
                     res.status(500).send({
@@ -63,11 +74,16 @@ export const createUserLogin = async (req, res) => {
                 const response = {
                     message: 'Usuário criado com sucesso',
                     data: {
+                        cod_company,
+                        company,
                         username,
                         email,
+                        password,
+                        role,
                         full_name,
                         date_of_birth,
-                        phone_number
+                        phone_number,
+                        permissions,
                     }
                 }
                 res.status(201).send(response);
