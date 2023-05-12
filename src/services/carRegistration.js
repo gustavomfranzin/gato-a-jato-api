@@ -1,8 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../dbConnect.js'
+import { getCompanyUserFromAccessToken } from './users/getCompanyUserFromAccessToken.js';
 
 export const createEntryCustomer = async (req, res) => {
     try {
+        const token = req.headers.authorization;
+
         const {
             customer_name,
             car_brand,
@@ -14,13 +17,14 @@ export const createEntryCustomer = async (req, res) => {
         } = req.body;
 
         const id = uuidv4();
+        const cod_company = getCompanyUserFromAccessToken(token);
         const created_at = new Date().toISOString();
 
 
-        const sql = `INSERT INTO car_registration (id, customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, created_at) 
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO car_registration (id, cod_company, customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, created_at) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        const values = [id, customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, created_at];
+        const values = [id, cod_company, customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, created_at];
 
         db.run(sql, values, (err) => {
 
@@ -46,6 +50,7 @@ export const createEntryCustomer = async (req, res) => {
             const response = {
                 message: 'Cliente criado com sucesso',
                 data: {
+                    cod_company,
                     id,
                     customer_name,
                     car_brand,
@@ -69,7 +74,10 @@ export const createEntryCustomer = async (req, res) => {
 
 export const readCustomerCreated = async (req, res) => {
     try {
-        db.all('SELECT * FROM car_registration ORDER BY created_at desc', [], (err, rows) => {
+        const token = req.headers.authorization;
+        const cod_company = getCompanyUserFromAccessToken(token);
+
+        db.all('SELECT * FROM car_registration WHERE cod_company = ? ORDER BY created_at DESC', [cod_company], (err, rows) => {
             if (err) {
                 console.error(err.message);
                 res.status(500).send('Não foi possível carregar os dados');
@@ -88,16 +96,19 @@ export const readCustomerCreated = async (req, res) => {
 export const updateCustomerCreated = async (req, res) => {
     try {
         const { id } = req.params;
+        const token = req.headers.authorization;
         const { customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type } = req.body;
         const updated_at = new Date().toISOString();
+        const cod_company = getCompanyUserFromAccessToken(token);
 
-        db.run('UPDATE car_registration SET customer_name=?, car_brand=?, car_model=?, car_year=?, car_license_plate=?, process_status=?, cleaning_type=?, updated_at=? WHERE id=?',
-            [customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, updated_at, id], function (err) {
+        db.run('UPDATE car_registration SET customer_name=?, car_brand=?, car_model=?, car_year=?, car_license_plate=?, process_status=?, cleaning_type=?, updated_at=? WHERE id=? and cod_company=?',
+            [customer_name, car_brand, car_model, car_year, car_license_plate, process_status, cleaning_type, updated_at, id, cod_company], function (err) {
                 if (err) {
                     console.error(err);
                     return res.status(500).send({
                         message: 'Erro ao atualizar os dados, formato inválido ou vazio',
                         data: {
+                            cod_company,
                             id,
                             customer_name,
                             car_brand,
@@ -115,7 +126,20 @@ export const updateCustomerCreated = async (req, res) => {
                     return res.status(404).send(`ID:${id} inválido ou não encontrado`);
                 }
 
-                res.status(200).send(`Cliente atualizado com sucesso`);
+                res.status(200).send({
+                    message: 'Cliente alterado com sucesso!',
+                    data: {
+                        cod_company,
+                        id,
+                        customer_name,
+                        car_brand,
+                        car_model,
+                        car_year,
+                        car_license_plate,
+                        process_status,
+                        cleaning_type,
+                    }
+                });
             });
     } catch (err) {
         console.error(err);
@@ -126,7 +150,10 @@ export const updateCustomerCreated = async (req, res) => {
 export const deleteCustomerCreated = async (req, res) => {
     try {
         const { id } = req.params;
-        db.run(`DELETE FROM car_registration WHERE id = ?`, id, function (err) {
+        const token = req.headers.authorization;
+        const cod_company = getCompanyUserFromAccessToken(token);
+
+        db.run(`DELETE FROM car_registration WHERE id = ? and cod_company=?`, id, cod_company, function (err) {
             if (err) {
                 console.error(err.message);
                 return res.status(500).send('Internal Server Error');

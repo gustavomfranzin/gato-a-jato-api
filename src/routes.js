@@ -1,6 +1,6 @@
 import carRegistrationRoutes from './routes/carRegistrationRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import { verifyToken } from './validators/validationToken.js'
+import { authMiddleware } from './middlewares/authMiddleware.js';
 
 export default (app) => {
 
@@ -8,6 +8,6 @@ export default (app) => {
         res.send('API Available at ' + new Date());
     });
 
-    app.use('/cars', verifyToken, carRegistrationRoutes);
+    app.use('/cars', authMiddleware, carRegistrationRoutes);
     app.use('/auth', userRoutes);
 };

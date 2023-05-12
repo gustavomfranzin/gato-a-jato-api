@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 export const loginUser = (req, res) => {
     const { username, password } = req.body;
 
-    db_accounts.get('SELECT id, username, password FROM users WHERE username=?', [username], (err, row) => {
+    db_accounts.get('SELECT id, cod_company, username, password FROM users WHERE username=?', [username], (err, row) => {
         if (err) {
             console.error(err.message);
             res.status(500).send({
@@ -23,8 +23,8 @@ export const loginUser = (req, res) => {
             const passwordMatch = bcrypt.compareSync(password, row.password);
 
             if (passwordMatch) {
-                const accessToken = jwt.sign({ userId: row.id }, `${TOKEN_ACCOUNTS}`, { expiresIn: `${EXPIRATION_TOKEN_ACCOUNTS}` });
-                const refreshToken = jwt.sign({ userId: row.id }, `${TOKEN_REFRESH_ACCOUNTS}`, { expiresIn: `${EXPIRATION_TOKEN_REFRESH_ACCOUNTS}` });
+                const accessToken = jwt.sign({ userId: row.id, codCompany: row.cod_company }, `${TOKEN_ACCOUNTS}`, { expiresIn: `${EXPIRATION_TOKEN_ACCOUNTS}` });
+                const refreshToken = jwt.sign({ userId: row.id, codCompany: row.cod_company }, `${TOKEN_REFRESH_ACCOUNTS}`, { expiresIn: `${EXPIRATION_TOKEN_REFRESH_ACCOUNTS}` });
 
                 db_accounts.run('UPDATE users SET access_token=?, refresh_token=? WHERE id=?', [accessToken, refreshToken, row.id], (err) => {
                     if (err) {
