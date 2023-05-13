@@ -2,7 +2,7 @@ import { PORT } from './config.js';
 import express from 'express';
 import cors from 'cors';
 import routes from './routes.js';
-import { validateJsonSyntax } from './validators/validationsRoutes.js';
+import { validateJsonSyntax } from './middlewares/validators/validationsRoutes.js';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
