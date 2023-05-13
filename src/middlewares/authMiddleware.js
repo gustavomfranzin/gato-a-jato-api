@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { TOKEN_ACCOUNTS } from '../config.js';
 
-const secretKey = TOKEN_ACCOUNTS;
-
 export const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization;
 
@@ -11,8 +9,8 @@ export const authMiddleware = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, secretKey);
-        req.user = decoded.user; // Armazena as informações do usuário decodificadas no objeto de requisição (req.user)
+        const decoded = jwt.verify(token, TOKEN_ACCOUNTS);
+        req.user = decoded.user;
         next();
     } catch (err) {
         console.error(err);

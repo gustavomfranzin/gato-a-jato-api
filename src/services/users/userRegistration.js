@@ -7,11 +7,9 @@ export const createUserLogin = async (req, res) => {
         username,
         email,
         password,
-        role,
         full_name,
         date_of_birth,
         phone_number,
-        permissions,
     } = req.body;
 
     try {
@@ -42,7 +40,6 @@ export const createUserLogin = async (req, res) => {
             }
 
             //autoincrement do cod_company, sqlite3 não permite autoincrement em dois campos
-
             function generateRandomNumber() {
                 return Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
             }
