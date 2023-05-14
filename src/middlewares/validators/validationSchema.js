@@ -58,4 +58,17 @@ const schemaUserCreate = Joi.object({
 
 const validateUserCreateFieldsMiddleware = validateFields(schemaUserCreate);
 
-export { validateFieldsMiddleware, validateUserCreateFieldsMiddleware };
+const schemaEmployeesUserCreate = Joi.object({
+  full_name: Joi.string().required(),
+  username: Joi.string().required(),
+  password: Joi.string().required(),
+  date_of_birth: Joi.string().custom(validateDateOfBirth, 'custom date format').required(),
+  phone_number: Joi.string().required(),
+  role: Joi.string().required(),
+  permissions: Joi.string().required(),
+
+});
+
+const validateEmployeesUserCreateFieldsMiddleware = validateFields(schemaEmployeesUserCreate);
+
+export { validateFieldsMiddleware, validateUserCreateFieldsMiddleware, validateEmployeesUserCreateFieldsMiddleware };

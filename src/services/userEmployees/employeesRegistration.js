@@ -1,20 +1,27 @@
-import { db_accounts } from '../../dbConnect.js';
+import { db } from '../../dbConnect.js';
 import bcrypt from 'bcryptjs';
+import { decodeToken } from '../users/decodeToken.js';
 
-export const createUserLogin = async (req, res) => {
+export const createEmployeesUser = async (req, res) => {
+    const token = req.headers.authorization;
+    const decodedToken = decodeToken(token);
+    const codCompany = decodedToken.codCompany;
+    const company = decodedToken.company;
+
     const {
-        company,
         username,
-        email,
         password,
+        email,
         full_name,
         date_of_birth,
         phone_number,
+        role,
+        permissions
     } = req.body;
 
-    const sql = 'SELECT id FROM users WHERE username = ? OR email = ?';
+    const sql = 'SELECT id FROM employees WHERE username =? and cod_company=?';
     try {
-        db_accounts.get(sql, [username, email], (err, row) => {
+        db.get(sql, [username, codCompany], (err, row) => {
             if (err) {
                 console.error(err.message);
                 res.status(500).send({
@@ -31,33 +38,21 @@ export const createUserLogin = async (req, res) => {
             }
             if (row) {
                 res.status(409).send({
-                    message: 'Usuário ou e-mail já existem',
+                    message: 'Usuário já existem',
                     data: {
                         username,
-                        email
                     }
                 })
                 return;
             }
 
-            //autoincrement do cod_company, sqlite3 não permite autoincrement em dois campos
-            function generateRandomNumber() {
-                return Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
-            }
-
-            const codCompany = generateRandomNumber();
-
             const salt = bcrypt.genSaltSync(10);
 
             const hashedPassword = bcrypt.hashSync(password, salt);
 
-            const permissions = 'root';
+            const sql = 'INSERT INTO employees (cod_company, company, username, email, password, role, full_name, date_of_birth, phone_number, permissions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-            const role = 'owner';
-
-            const sql = 'INSERT INTO users (cod_company, company, username, email, password, role, full_name, date_of_birth, phone_number, permissions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-
-            db_accounts.run(sql, [codCompany, company, username, email, hashedPassword, role, full_name, date_of_birth, phone_number, permissions], function (err) {
+            db.run(sql, [codCompany, company, username, email, hashedPassword, role, full_name, date_of_birth, phone_number, permissions], function (err) {
                 if (err) {
                     console.error(err.message);
                     res.status(500).send({

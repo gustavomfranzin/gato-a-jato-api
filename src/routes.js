@@ -1,6 +1,7 @@
 import carRegistrationRoutes from './routes/carRegistrationRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import { authMiddleware } from './middlewares/authMiddleware.js';
+import employeesRoutes from './routes/employeesRoutes.js'
 
 export default (app) => {
 
@@ -9,5 +10,6 @@ export default (app) => {
     });
 
     app.use('/cars', authMiddleware, carRegistrationRoutes);
+    app.use('/employees', authMiddleware, employeesRoutes)
     app.use('/auth', userRoutes);
 };
