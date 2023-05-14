@@ -30,14 +30,14 @@ export const createUserLogin = async (req, res) => {
                 return
             }
             if (row) {
-                res.status(409).send({
-                    message: 'Usuário ou e-mail já existem',
+                return res.status(409).send({
+                    success: false,
+                    error: true,
+                    message: 'Usuário já existe',
                     data: {
                         username,
-                        email
                     }
                 })
-                return;
             }
 
             //autoincrement do cod_company, sqlite3 não permite autoincrement em dois campos
@@ -60,7 +60,9 @@ export const createUserLogin = async (req, res) => {
             db_accounts.run(sql, [codCompany, company, username, email, hashedPassword, role, full_name, date_of_birth, phone_number, permissions], function (err) {
                 if (err) {
                     console.error(err.message);
-                    res.status(500).send({
+                    return res.status(500).send({
+                        success: false,
+                        error: true,
                         message: 'Erro ao criar usuário, formato inválido ou vazio',
                         data: {
                             username,
@@ -70,29 +72,29 @@ export const createUserLogin = async (req, res) => {
                             phone_number
                         }
                     });
-                    return
                 }
 
                 const response = {
+                    success: true,
+                    error: false,
                     message: 'Usuário criado com sucesso',
                     data: {
                         codCompany,
                         company,
                         username,
                         email,
-                        password,
-                        role,
                         full_name,
                         date_of_birth,
                         phone_number,
                         permissions,
                     }
                 }
-                res.status(201).send(response);
+
+                return res.status(201).send(response);
             });
         })
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error')
+        return res.status(500).send('Server Error')
     }
 }

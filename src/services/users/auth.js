@@ -85,14 +85,14 @@ export const refreshTokens = (req, res) => {
                             return res.status(500).send('Erro ao atualizar o token de acesso');
                         }
 
-                        res.status(200).json({
+                        return res.status(200).json({
                             message: 'Token atualizado',
                             access_token: newAccessToken
                         });
                     });
                 } else {
 
-                    res.status(200).json({
+                    return res.status(200).json({
                         message: 'Token dentro da validade',
                         access_token: accessToken
                     });
