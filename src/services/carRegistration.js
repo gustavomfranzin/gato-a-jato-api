@@ -168,7 +168,7 @@ export const deleteCustomerCreated = async (req, res) => {
                 return res.status(404).send(`Ocorreu um erro, ID: ${id} não encontrado`);
             }
 
-            res.status(200).send(`Cliente com ID: ${id} deletado com sucesso`);
+            res.sendStatus(204);
         });
     } catch (err) {
         console.error(err);
