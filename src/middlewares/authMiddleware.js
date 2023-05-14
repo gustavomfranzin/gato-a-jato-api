@@ -4,7 +4,7 @@ import { TOKEN_ACCOUNTS } from '../config.js';
 export const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization;
 
-    if (!token) {
+    if (!token || token === 'null') {
         return res.status(401).json({ message: 'Token de acesso não fornecido' });
     }
 
