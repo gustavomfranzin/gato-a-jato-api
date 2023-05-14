@@ -26,7 +26,7 @@ export const loginUser = (req, res) => {
                 const accessToken = jwt.sign({ userId: row.id, codCompany: row.cod_company }, `${TOKEN_ACCOUNTS}`, { expiresIn: `${EXPIRATION_TOKEN_ACCOUNTS}` });
                 const refreshToken = jwt.sign({ userId: row.id, codCompany: row.cod_company }, `${TOKEN_REFRESH_ACCOUNTS}`, { expiresIn: `${EXPIRATION_TOKEN_REFRESH_ACCOUNTS}` });
 
-                db_accounts.run('UPDATE users SET access_token=?, refresh_token=? WHERE id=?', [accessToken, refreshToken, row.id], (err) => {
+                db_accounts.run('UPDATE users SET access_token=?, refresh_token=? WHERE id=? and cod_company=?', [accessToken, refreshToken, row.id, row.cod_company], (err) => {
                     if (err) {
                         console.error(err.message);
                         res.status(500).send('Erro ao salvar os tokens');
@@ -60,8 +60,9 @@ export const refreshTokens = (req, res) => {
         }
 
         const userId = decoded.userId;
+        const codCompany = decoded.codCompany;
 
-        db_accounts.get('SELECT id, access_token FROM users WHERE id=?', [userId], (err, row) => {
+        db_accounts.get('SELECT id, cod_company, access_token FROM users WHERE id=? and cod_company=?', [userId, codCompany], (err, row) => {
             if (err) {
                 console.error(err.message);
                 return res.status(500).send('Erro ao verificar o usuário');
@@ -76,9 +77,9 @@ export const refreshTokens = (req, res) => {
             jwt.verify(accessToken, TOKEN_ACCOUNTS, (err) => {
                 if (err) {
 
-                    const newAccessToken = jwt.sign({ userId: row.id }, TOKEN_ACCOUNTS, { expiresIn: `${EXPIRATION_TOKEN_ACCOUNTS}` });
+                    const newAccessToken = jwt.sign({ userId: row.id, codCompany: row.cod_company }, `${TOKEN_ACCOUNTS}`, { expiresIn: `${EXPIRATION_TOKEN_ACCOUNTS}` });
 
-                    db_accounts.run('UPDATE users SET access_token=? WHERE id=?', [newAccessToken, userId], (err) => {
+                    db_accounts.run('UPDATE users SET access_token=? WHERE id=? and cod_company=?', [newAccessToken, userId, codCompany], (err) => {
                         if (err) {
                             console.error(err.message);
                             return res.status(500).send('Erro ao atualizar o token de acesso');
