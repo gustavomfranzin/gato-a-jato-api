@@ -8,7 +8,7 @@ export const authMiddleware = async (req, res, next) => {
     const isValidToken = await verifyToken(token);
 
     if (!isValidToken) {
-        return res.status(401).json({ message: 'Token de acesso não expirado' });
+        return res.status(401).json({ message: 'Token de acesso expirado' });
     }
 
     if (!token || token === 'null') {
