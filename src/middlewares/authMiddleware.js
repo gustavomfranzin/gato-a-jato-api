@@ -1,8 +1,15 @@
 import jwt from 'jsonwebtoken';
 import { TOKEN_ACCOUNTS } from '../config.js';
+import { verifyToken } from '../services/users/logout.js';
 
-export const authMiddleware = (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
     const token = req.headers.authorization;
+
+    const isValidToken = await verifyToken(token);
+
+    if (!isValidToken) {
+        return res.status(401).json({ message: 'Token de acesso não expirado' });
+    }
 
     if (!token || token === 'null') {
         return res.status(401).json({ message: 'Token de acesso não fornecido' });
